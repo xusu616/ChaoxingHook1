@@ -1,6 +1,6 @@
 # ChaoxingHook — Modern Xposed API 102
 
-本分支将模块迁移到 `io.github.libxposed:api:102.0.0`，最低框架 API 为 **102**。使用支持现代 API 102 的 Xposed 框架，启用模块并选择 `com.chaoxing.mobile`，然后重新启动学习通。传统 Xposed API 82 和现代 API 100/101 不支持本版本。
+本分支将模块迁移到 `io.github.libxposed:api:102.0.0`，最低框架 API 为 **102**。使用支持现代 API 102 的 Xposed 框架，启用模块并选择 `com.chaoxing.mobile`，然后重新启动学习通。传统 Xposed API 82 和现代 API 100/101 不支持本版本（也不一定？100之后应该向下兼容（不包括100
 
 迁移保留现有 Java 功能，新增 Kotlin 模块入口及回调适配层。入口在最终宿主 ClassLoader 就绪时注册 Hook；Application.attach 后保存宿主 Context。模块关闭热重载，更新后需重新启动宿主。
 
