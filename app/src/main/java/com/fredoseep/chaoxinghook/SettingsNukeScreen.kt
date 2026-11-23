@@ -1,5 +1,6 @@
 package com.fredoseep.chaoxinghook
 
+import android.annotation.SuppressLint
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
@@ -51,6 +52,9 @@ import dev.nuke.ui.rememberNukeRevealStackState
  * `if (onClick == null) Modifier else nukeJellyClickable(...)`，
  * 漏传的行不会有任何按压反馈 —— 开关行最容易踩这个坑。
  */
+// Nuke predictivePop delegates event collection to predictiveConceal in the bundled AAR.
+// Lint cannot inspect that delegated call; this suppression applies only to this screen.
+@SuppressLint("NoCollectCallFound")
 @Composable
 fun SettingsNukeScreen() {
     val style = rememberCurrentUiStyle()
