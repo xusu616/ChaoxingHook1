@@ -1,6 +1,5 @@
 package com.fredoseep.chaoxinghook
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,6 +23,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.darkColorScheme
@@ -152,14 +152,22 @@ private fun M3Row(row: HookSettingRow, scaffold: SettingsScaffold) {
         is HookSettingRow.Action -> ListItem(
             headlineContent = { Text(row.title) },
             supportingContent = { Text(row.summary) },
-            modifier = Modifier.clickableRow(row.onClick),
+            trailingContent = {
+                TextButton(onClick = row.onClick) {
+                    Text(if (row.confirm != null) "重置" else "打开")
+                }
+            },
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         )
 
         is HookSettingRow.MapPick -> ListItem(
             headlineContent = { Text(row.title) },
             supportingContent = { Text(row.summary) },
-            modifier = Modifier.clickableRow { scaffold.launchMapPicker() },
+            trailingContent = {
+                TextButton(onClick = { scaffold.launchMapPicker() }) {
+                    Text("选点")
+                }
+            },
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         )
 
@@ -185,10 +193,6 @@ private fun M3Row(row: HookSettingRow, scaffold: SettingsScaffold) {
     }
 }
 
-/** 动作行整行可点（Material 3 的 ListItem 自身不带点击） */
-private fun Modifier.clickableRow(onClick: () -> Unit): Modifier =
-    this.clickable(onClick = onClick)
-
 /**
  * 三套风格的单选。
  *
@@ -208,7 +212,6 @@ private fun M3UiStylePicker(selected: UiStyle, onStyleChange: (UiStyle) -> Unit)
                         onClick = { onStyleChange(style) },
                     )
                 },
-                modifier = Modifier.clickableRow { onStyleChange(style) },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
             )
         }

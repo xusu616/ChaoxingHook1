@@ -12,6 +12,7 @@ import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -83,9 +84,9 @@ public class MapPickerActivity extends AppCompatActivity {
         tvLng = findViewById(R.id.tv_lng);
         tvHint = findViewById(R.id.tv_hint);
         layoutSuggestions = findViewById(R.id.layout_suggestions);
-        View btnConfirm = findViewById(R.id.btn_confirm);
-        View btnBack = findViewById(R.id.btn_back);
-        View btnSearch = findViewById(R.id.btn_search);
+        Button btnConfirm = findViewById(R.id.btn_confirm);
+        Button btnBack = findViewById(R.id.btn_back);
+        Button btnSearch = findViewById(R.id.btn_search);
 
         // Add status bar height to top padding
         LinearLayout searchArea = (LinearLayout) etSearch.getParent().getParent();
@@ -235,15 +236,16 @@ public class MapPickerActivity extends AppCompatActivity {
                 final String name = safeOptString(tip, "name");
                 final String location = safeOptString(tip, "location");
 
-                TextView item = new TextView(this);
+                Button item = new Button(this);
                 item.setText(name);
                 item.setTextSize(14);
                 item.setTextColor(0xFF2D2640);
                 item.setPadding(32, 22, 32, 22);
                 item.setMaxLines(1);
                 item.setEllipsize(android.text.TextUtils.TruncateAt.END);
-                item.setClickable(true);
-                item.setFocusable(true);
+                item.setAllCaps(false);
+                item.setGravity(android.view.Gravity.START | android.view.Gravity.CENTER_VERTICAL);
+                item.setBackgroundColor(android.graphics.Color.TRANSPARENT);
 
                 item.setOnClickListener(v -> {
                     ignoreTextChange = true;
