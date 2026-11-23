@@ -1,3 +1,12 @@
+## 2026-11-23 — 6.0.0-api102.1
+
+- 模块入口、打包元数据和全部现有 Hook 调用迁移 Modern Xposed API 102；去掉传统 API 82 依赖。
+- Kotlin 适配层保留 Java 回调的前置／后置语义、参数替换、提前返回和原始异常；宿主 Context 在 Application.attach 后保存。
+- 关闭热重载；框架最低 API 102，作用域为 com.chaoxing.mobile。
+- 新增 16 项回归测试，覆盖调用状态和反射兼容行为。
+- Gradle 保持 9.5.0，修复无效镜像下载，改用官方源并验证 SHA-256。
+- APK versionCode 提升到 3，使用 fork 独立签名。此为预发布迁移版本，尚未验证学习通实际注入和防切屏效果。
+
 ---
 标题: ChaoxingHook 变更记录
 日期: 2026-09-14

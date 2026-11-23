@@ -14,7 +14,7 @@ tags: hook 点, DexKit, 配置, 踩坑, 推送规范
 | 项 | 值 |
 |---|---|
 | 目标 | com.chaoxing.mobile（学习通 **7.0.3** 实测 2026-09-14 通过；7.0.1 适配基线 2026-09-01；6.7.8 历史） |
-| 框架 | Xposed API 82（compileOnly），LSPosed 激活 |
+| 框架 | Modern Xposed API 102（compileOnly）；最低框架 API 102，禁用热重载 |
 | 语言 | Java（hook）+ Kotlin（配置/设置 UI，Compose，三套风格见 §7） |
 | 关键依赖 | DexKit（运行时反混淆定位，加固场景用 ClassLoader 方式创建）、高德 3D 地图 SDK V11.2.100（本地 `libs/*.jar` + `jniLibs`，16KB 对齐适配版）、MIUIX 0.9.4-rc01 / **Nuke**（自研，本地 `libs/nuke-release.aar`）/ Material 3 1.4.0 |
 | SDK | compileSdk 37 / **targetSdk 35**（高德旧版 so 未 16KB 对齐，勿随意升 targetSdk）/ **minSdk 28**（Nuke 的 minSdk 就是 28） |
@@ -24,7 +24,7 @@ tags: hook 点, DexKit, 配置, 踩坑, 推送规范
 ## 2. 架构
 
 ```
-handleLoadPackage（仅 com.chaoxing.mobile）
+onPackageReady（仅 com.chaoxing.mobile；最终宿主 ClassLoader）
 ├── installProcessExitHook        System.exit / Runtime.exit 阻断（受考试风控开关）
 ├── DexKitBridge.create(classLoader, useMemoryDexFile=true)   ← 梆梆加固必须 ClassLoader 方式
 │   └── installCoreHooks          原生类 hook（§3 功能 1-7，DexKit 结构匹配+回退）

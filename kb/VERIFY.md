@@ -59,12 +59,12 @@ adb exec-out su -c "tail -f /data/adb/lspd/log/modules_*.log | grep --line-buffe
 
 | 日志行 | 含义 |
 |---|---|
-| `=== handleLoadPackage enter` | 模块已注入（加固前生效） |
+| `=== onPackageReady enter` | 现代 API 102 入口已执行（最终 ClassLoader 就绪） |
 | `loadLibrary dexkit OK` / `DexKitBridge.create OK` | DexKit 正常 |
 | `db-query: clazz=y6e matchedMethods=2` | 功能 5 结构匹配命中 |
 | `DexKit[chat-filter]: com.chaoxing.mobile.chat.manager.b` | 功能 6 命中 |
 | `installWebViewHooks/FileReplaceHook/ExamSnapshotHook OK` | 各层挂载完成 |
-| `=== handleLoadPackage done` | 装载结束 |
+| `=== onPackageReady done` | 装载结束 |
 
 **任何 `[tag] 结构匹配失败` / `回退类不存在` / `方法未找到` 行 = 对应功能已失效**，按 MODULE_NOTES §4 流程重新定位新类名。
 

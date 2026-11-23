@@ -25,8 +25,8 @@ android {
         // targetSdk 35（Android 16 兼容模式）：高德 SDK(10.0.600) 未适配 16KB 页对齐，
         // targetSdk>=36 时其 so 在 16KB 设备上无法加载；compileSdk 37 不受影响
         targetSdk 35
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "6.0.0-api102.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

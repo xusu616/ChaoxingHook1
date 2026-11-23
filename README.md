@@ -1,3 +1,30 @@
+# ChaoxingHook — Modern Xposed API 102
+
+本分支将模块迁移到 `io.github.libxposed:api:102.0.0`，最低框架 API 为 **102**。使用支持现代 API 102 的 Xposed 框架，启用模块并选择 `com.chaoxing.mobile`，然后重新启动学习通。传统 Xposed API 82 和现代 API 100/101 不支持本版本。
+
+迁移保留现有 Java 功能，新增 Kotlin 模块入口及回调适配层。入口在最终宿主 ClassLoader 就绪时注册 Hook；Application.attach 后保存宿主 Context。模块关闭热重载，更新后需重新启动宿主。
+
+`6.0.0-api102.1` 为迁移预发布版本：构建和 16 个回调／反射回归测试通过，尚未验证学习通内的实际注入和切屏上报拦截效果。上游对学习通 7.0.3 的历史实测不代表本迁移版本已经通过同样验证。
+
+APK 使用本 fork 的独立签名，不能直接覆盖上游签名的安装包。应用包名仍为 `com.fredoseep.chaoxinghook`；卸载上游版本前请备份所需模块配置。
+
+构建需要 JDK 17+、Android SDK 37.0 和本机 `local.properties` 中的 `sdk.dir`。沿用原有 AGP、Kotlin 和 Gradle 版本；Gradle 9.5.0 改用官方源并校验 SHA-256。高德密钥仍由不入库的 `local.properties` 提供，缺少密钥时地图功能不可用。
+
+```powershell
+.\gradlew.bat :app:assembleDebug :app:assembleRelease :app:testDebugUnitTest
+```
+
+Release 构建产物默认未签名。使用自己的持久签名密钥签名；本机发布密钥和密码保存在不入库的 `.signing/`，请备份该目录，后续升级必须复用同一密钥。
+
+```powershell
+apksigner sign --ks .signing/chaoxinghook-api102.jks --ks-key-alias chaoxinghook-api102 --ks-pass file:.signing/password.txt --out chaoxinghook-6.0.0-api102.1.apk app/build/outputs/apk/release/app-release-unsigned.apk
+apksigner verify --verbose --print-certs chaoxinghook-6.0.0-api102.1.apk
+```
+
+下面保留上游功能说明。
+
+---
+
 免责声明 / Disclaimer
 中文
 本软件仅供技术学习与交流使用。使用者须自行确保其使用行为符合所在国家和地区的法律法规。
