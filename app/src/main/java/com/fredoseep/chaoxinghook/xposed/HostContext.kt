@@ -1,18 +1,19 @@
 package com.fredoseep.chaoxinghook.xposed
 
+import android.app.Application
 import android.content.Context
 
-/** The Application.attach base context belongs to this host process. */
+/** The host Application is the process-lifetime owner; Activity contexts are never retained. */
 object HostContext {
     @Volatile
-    private var context: Context? = null
+    private var application: Application? = null
 
     @JvmStatic
-    fun attach(hostContext: Context) {
-        require(hostContext.packageName == "com.chaoxing.mobile")
-        context = hostContext
+    fun attach(hostApplication: Application) {
+        require(hostApplication.packageName == "com.chaoxing.mobile")
+        application = hostApplication
     }
 
     @JvmStatic
-    fun getContext(): Context? = context
+    fun getContext(): Context? = application
 }

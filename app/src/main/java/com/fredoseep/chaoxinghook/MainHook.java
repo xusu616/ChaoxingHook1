@@ -87,6 +87,7 @@ public final class MainHook {
                     protected void afterHookedMethod(MethodHookParam param) {
                         if (param.hasThrowable()) return;
                         if (param.args.length > 0 && param.args[0] instanceof android.content.Context) {
+                            HostContext.attach((android.app.Application) param.thisObject);
                             initializeApplicationHooks((android.content.Context) param.args[0]);
                         }
                     }
@@ -96,7 +97,6 @@ public final class MainHook {
 
     private void initializeApplicationHooks(android.content.Context context) {
         if (!"com.chaoxing.mobile".equals(context.getPackageName())) return;
-        HostContext.attach(context);
         ClassLoader loader = context.getClassLoader();
         if (loader == null) {
             Log.e(TAG_INIT, "Application.attach ready: ClassLoader unavailable");
