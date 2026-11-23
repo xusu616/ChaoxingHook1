@@ -1,3 +1,9 @@
+## 2026-11-23 — 6.0.0-api102.2
+
+- 普通布局容器不绑定点击操作：Material 3 动作／地图入口改为按钮，普通地图页的返回、搜索、确认及建议项使用 Button。
+- 保留 Nuke 外层点击果冻效果、MIUIX 原生点击涟漪，以及 RadioButton／IconButton 的操作。
+- 点击区域调整独立于 API 迁移提交；versionCode 提升到 4。
+
 ## 2026-11-23 — 6.0.0-api102.1
 
 - 模块入口、打包元数据和全部现有 Hook 调用迁移 Modern Xposed API 102；去掉传统 API 82 依赖。
