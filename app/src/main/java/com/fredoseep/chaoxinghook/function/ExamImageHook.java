@@ -2,19 +2,17 @@ package com.fredoseep.chaoxinghook.function;
 
 import android.util.Log;
 import java.io.File;
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.XposedHelpers;
-import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
+import com.fredoseep.chaoxinghook.xposed.ModernHookCallback;
+import com.fredoseep.chaoxinghook.xposed.HookRuntime;
 import static com.fredoseep.chaoxinghook.function.HookConfigRepository.getSignConfig;
 import static com.fredoseep.chaoxinghook.function.HookConfigRepository.FAKE_UPLOAD_FILE_PATH;
 
 /** 考试截图文件替换和旧版截图协议 Hook。 */
 public final class ExamImageHook {
     private static final String TAG_EXAM_IMAGE = "CX.ExamImage";
-    public static void installFileReplaceHook(LoadPackageParam lpparam) {
+    public static void installFileReplaceHook(ClassLoader classLoader) {
         try {
-            XC_MethodHook fileReadHook = new XC_MethodHook() {
+            ModernHookCallback fileReadHook = new ModernHookCallback() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                     if (param.args.length == 0 || param.args[0] == null) return;
@@ -51,27 +49,27 @@ public final class ExamImageHook {
                 }
             };
 
-            XposedBridge.hookAllConstructors(java.io.FileInputStream.class, fileReadHook);
+            HookRuntime.hookAllConstructors(java.io.FileInputStream.class, fileReadHook);
 
         } catch (Throwable t) {
             Log.e(TAG_EXAM_IMAGE, "Chaoxing Error (File Replace Hook): ", t);
         }
     }
 
-    public static void installExamSnapshotHook(LoadPackageParam lpparam) {
+    public static void installExamSnapshotHook(ClassLoader classLoader) {
         try {
-            XposedHelpers.findAndHookMethod(
+            HookRuntime.findAndHookMethod(
                     "com.chaoxing.mobile.webapp.jsprotocal.common.f1",
-                    lpparam.classLoader,
+                    classLoader,
                     "q0",
                     File.class,
-                    new XC_MethodHook() {
+                    new ModernHookCallback() {
                         @Override
                         protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                             Log.i(TAG_EXAM_IMAGE, "Chaoxing [终极斩杀]: 成功拦截 f1.q0，ExamKeeper 截图上传已被物理蒸发！");
                             Object f1Instance = param.thisObject;
-                            String fakeSuccessJson = (String) XposedHelpers.callMethod(f1Instance, "f0", 1, null);
-                            XposedHelpers.callMethod(f1Instance, "r", "CLIENT_SNAPSHOT", fakeSuccessJson);
+                            String fakeSuccessJson = (String) HookRuntime.callMethod(f1Instance, "f0", 1, null);
+                            HookRuntime.callMethod(f1Instance, "r", "CLIENT_SNAPSHOT", fakeSuccessJson);
                             param.setResult(null);
                         }
                     }

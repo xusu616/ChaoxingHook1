@@ -1,7 +1,6 @@
 package com.fredoseep.chaoxinghook;
 
-import android.app.AndroidAppHelper;
-import de.robv.android.xposed.IXposedHookLoadPackage;
+import com.fredoseep.chaoxinghook.xposed.HostContext;
 import android.util.Log;
 
 
@@ -16,13 +15,12 @@ import com.fredoseep.chaoxinghook.function.QRTesting;
 import com.fredoseep.chaoxinghook.function.SettingsEntryHook;
 import com.fredoseep.chaoxinghook.function.WebViewHooks;
 
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedHelpers;
-import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
+import com.fredoseep.chaoxinghook.xposed.ModernHookCallback;
+import com.fredoseep.chaoxinghook.xposed.HookRuntime;
 import org.luckypray.dexkit.DexKitBridge;
 
 /** Xposed 入口：仅负责目标包过滤、初始化时机和功能安装。 */
-public final class MainHook implements IXposedHookLoadPackage {
+public final class MainHook {
     private static final String TAG_INIT = "CX.Init";
     private static final String TAG_WEBVIEW = "CX.WebView";
     private static final String TAG_EXAM_RISK = "CX.ExamRisk";
@@ -33,10 +31,8 @@ public final class MainHook implements IXposedHookLoadPackage {
     private final WebViewHooks webViewHooks = new WebViewHooks();
     private final SettingsEntryHook settingsEntryHook = new SettingsEntryHook();
 
-    @Override
-    public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable {
-        if (!lpparam.packageName.equals("com.chaoxing.mobile")) return;
-        Log.d(TAG_INIT, "=== handleLoadPackage enter: " + System.currentTimeMillis());
+    public void install(ClassLoader classLoader) {
+        Log.d(TAG_INIT, "=== onPackageReady enter: " + System.currentTimeMillis());
         try {
             System.loadLibrary("dexkit");
             Log.i(TAG_INIT, "loadLibrary dexkit OK");
@@ -45,7 +41,7 @@ public final class MainHook implements IXposedHookLoadPackage {
         }
 
         try{
-            MsgReadHook.hook(lpparam.classLoader);
+            MsgReadHook.hook(classLoader);
         } catch (Exception e) {
             Log.e("MsgReadHook","Error at MsgReadHook "+e.getMessage());
         }
@@ -63,30 +59,30 @@ public final class MainHook implements IXposedHookLoadPackage {
             Log.e(TAG_INIT, "Application.attach observer FAILED: ", t);
         }
         try {
-            webViewHooks.install(lpparam);
+            webViewHooks.install(classLoader);
             Log.i(TAG_WEBVIEW, "installWebViewHooks OK");
         } catch (Throwable t) {
             Log.e(TAG_WEBVIEW, "installWebViewHooks FAILED: ", t);
         }
         try {
-            ExamImageHook.installFileReplaceHook(lpparam);
+            ExamImageHook.installFileReplaceHook(classLoader);
             Log.i(TAG_EXAM_IMAGE, "installFileReplaceHook OK");
         } catch (Throwable t) {
             Log.e(TAG_EXAM_IMAGE, "installFileReplaceHook FAILED: ", t);
         }
         try {
-            ExamImageHook.installExamSnapshotHook(lpparam);
+            ExamImageHook.installExamSnapshotHook(classLoader);
             Log.i(TAG_EXAM_IMAGE, "installExamSnapshotHook OK");
         } catch (Throwable t) {
             Log.e(TAG_EXAM_IMAGE, "installExamSnapshotHook FAILED: ", t);
         }
-        QRTesting.hook(lpparam);
-        Log.d(TAG_INIT, "=== handleLoadPackage done; business hooks deferred");
+        QRTesting.hook(classLoader);
+        Log.d(TAG_INIT, "=== onPackageReady done; business hooks deferred");
     }
 
     private void installApplicationReadyHook() {
-        XposedHelpers.findAndHookMethod(android.app.Application.class, "attach",
-                android.content.Context.class, new XC_MethodHook() {
+        HookRuntime.findAndHookMethod(android.app.Application.class, "attach",
+                android.content.Context.class, new ModernHookCallback() {
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) {
                         if (param.hasThrowable()) return;
@@ -96,14 +92,11 @@ public final class MainHook implements IXposedHookLoadPackage {
                     }
                 });
         Log.i(TAG_INIT, "Application.attach observer registered");
-        android.app.Application current = AndroidAppHelper.currentApplication();
-        if (current != null && current.getBaseContext() != null) {
-            initializeApplicationHooks(current.getBaseContext());
-        }
     }
 
     private void initializeApplicationHooks(android.content.Context context) {
         if (!"com.chaoxing.mobile".equals(context.getPackageName())) return;
+        HostContext.attach(context);
         ClassLoader loader = context.getClassLoader();
         if (loader == null) {
             Log.e(TAG_INIT, "Application.attach ready: ClassLoader unavailable");

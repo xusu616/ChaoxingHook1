@@ -3,4 +3,5 @@
     <string name="map_search_hint">搜索地点</string>
     <string name="map_confirm">确认选取</string>
     <string name="map_click_hint">点击地图选取坐标</string>
+    <string name="module_description">超星学习通辅助工具（Modern Xposed API 102）</string>
 </resources>

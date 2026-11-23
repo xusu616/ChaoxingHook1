@@ -3,10 +3,8 @@ package com.fredoseep.chaoxinghook.function;
 import android.util.Log;
 import java.util.HashSet;
 import java.util.Set;
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.XposedHelpers;
-import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
+import com.fredoseep.chaoxinghook.xposed.ModernHookCallback;
+import com.fredoseep.chaoxinghook.xposed.HookRuntime;
 
 /** WebView Hook 注册和事件分发；具体业务由各功能类实现。 */
 public final class WebViewHooks {
@@ -14,10 +12,10 @@ public final class WebViewHooks {
     private final Set<String> hookedWebViewClients = new HashSet<>();
     private final PostSignHook postSign = new PostSignHook();
 
-    public void install(LoadPackageParam lpparam) {
+    public void install(ClassLoader classLoader) {
         try {
-            Class<?> webViewClass = XposedHelpers.findClass("android.webkit.WebView", lpparam.classLoader);
-            XposedBridge.hookAllMethods(webViewClass, "setWebViewClient", new XC_MethodHook() {
+            Class<?> webViewClass = HookRuntime.findClass("android.webkit.WebView", classLoader);
+            HookRuntime.hookAllMethods(webViewClass, "setWebViewClient", new ModernHookCallback() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     Object webViewObj = param.thisObject;
@@ -37,7 +35,7 @@ public final class WebViewHooks {
 
                     Class<?> targetClass = clientClass;
                     while (targetClass != null && !targetClass.getName().equals("java.lang.Object")) {
-                        XposedBridge.hookAllMethods(targetClass, "shouldInterceptRequest", new XC_MethodHook() {
+                        HookRuntime.hookAllMethods(targetClass, "shouldInterceptRequest", new ModernHookCallback() {
                             @Override
                             protected void beforeHookedMethod(MethodHookParam innerParam) throws Throwable {
                                 String url = null;
@@ -47,13 +45,13 @@ public final class WebViewHooks {
                                     if (arg instanceof String) { url = (String) arg; }
                                     else if (arg instanceof android.webkit.WebResourceRequest) {
                                         requestObj = arg;
-                                        Object uriObj = XposedHelpers.callMethod(arg, "getUrl");
+                                        Object uriObj = HookRuntime.callMethod(arg, "getUrl");
                                         if (uriObj != null) url = uriObj.toString();
                                     }
                                 }
                                 if (url == null) return;
 
-                                ClassLoader loader = lpparam.classLoader;
+                                ClassLoader loader = classLoader;
                                 if (ExamRiskHook.intercept(url, requestObj, innerParam, loader)) return;
                                 if (VideoUnlockHook.intercept(url, requestObj, innerParam, loader)) return;
                                 if (CopyRestrictionHook.intercept(url, requestObj, innerParam, loader)) return;
@@ -61,7 +59,7 @@ public final class WebViewHooks {
                             }
                         });
                         // ===== 页面加载完成注入：手势/位置签到自动完成 =====
-                        XposedBridge.hookAllMethods(targetClass, "onPageFinished", new XC_MethodHook() {
+                        HookRuntime.hookAllMethods(targetClass, "onPageFinished", new ModernHookCallback() {
                             @Override
                             protected void afterHookedMethod(MethodHookParam innerParam) throws Throwable {
                                 try {
@@ -78,7 +76,7 @@ public final class WebViewHooks {
                 }
             });
 
-            XC_MethodHook jsInterceptHook = new XC_MethodHook() {
+            ModernHookCallback jsInterceptHook = new ModernHookCallback() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                     if (param.args.length > 0 && param.args[0] instanceof String) {
@@ -89,8 +87,8 @@ public final class WebViewHooks {
                     }
                 }
             };
-            XposedBridge.hookAllMethods(webViewClass, "evaluateJavascript", jsInterceptHook);
-            XposedBridge.hookAllMethods(webViewClass, "loadUrl", jsInterceptHook);
+            HookRuntime.hookAllMethods(webViewClass, "evaluateJavascript", jsInterceptHook);
+            HookRuntime.hookAllMethods(webViewClass, "loadUrl", jsInterceptHook);
 
         } catch (Throwable t) {
             Log.e(TAG_WEBVIEW, "Chaoxing AdSkip Error (WebView Hook): ", t);

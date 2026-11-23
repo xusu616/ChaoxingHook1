@@ -1,6 +1,6 @@
 package com.fredoseep.chaoxinghook.function;
 
-import android.app.AndroidAppHelper;
+import com.fredoseep.chaoxinghook.xposed.HostContext;
 import android.util.Log;
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,7 +25,7 @@ final class HookConfigRepository {
         READING_CONFIG.set(true);
         try {
             SignConfig config = new SignConfig();
-            File file = ConfigStorage.file(AndroidAppHelper.currentApplication());
+            File file = ConfigStorage.file(HostContext.getContext());
 
             if (!file.exists() && !new File(file.getPath() + ".bak").exists()) {
                 try {

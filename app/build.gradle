@@ -62,7 +62,8 @@ android {
 dependencies {
     implementation libs.appcompat
     implementation libs.material
-    compileOnly 'de.robv.android.xposed:api:82'
+    compileOnly 'io.github.libxposed:api:102.0.0'
+    testImplementation 'io.github.libxposed:api:102.0.0'
     // 本地集成的 SDK（libs/ 下的 jar 与 aar）：
     // - 高德 3D 地图 SDK V11.2.100（16KB 对齐适配版，旧版 10.0.600 的 so 未对齐）
     // - Nuke 组件库 nuke-release.aar（自研，仓库外无发布；见下方说明）

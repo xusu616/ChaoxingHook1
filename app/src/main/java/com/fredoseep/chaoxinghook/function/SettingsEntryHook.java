@@ -1,10 +1,9 @@
 package com.fredoseep.chaoxinghook.function;
 
-import android.app.AndroidAppHelper;
+import com.fredoseep.chaoxinghook.xposed.HostContext;
 import android.util.Log;
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.XposedHelpers;
+import com.fredoseep.chaoxinghook.xposed.ModernHookCallback;
+import com.fredoseep.chaoxinghook.xposed.HookRuntime;
 
 /** 我的页面长按设置入口：生命周期、文本绑定和布局观察。 */
 public final class SettingsEntryHook {
@@ -19,7 +18,7 @@ public final class SettingsEntryHook {
     public void install(ClassLoader loader) {
         int installed = 0;
         try {
-            int count = XposedBridge.hookAllMethods(android.app.Activity.class, "onResume", new XC_MethodHook() {
+            int count = HookRuntime.hookAllMethods(android.app.Activity.class, "onResume", new ModernHookCallback() {
                 @Override protected void afterHookedMethod(MethodHookParam param) {
                     android.app.Activity activity = (android.app.Activity) param.thisObject;
                     if (activity.getWindow() != null) {
@@ -31,7 +30,7 @@ public final class SettingsEntryHook {
             Log.i(TAG_SETTINGS, "Activity.onResume 实际 Hook 数=" + count);
         } catch (Throwable t) { Log.e(TAG_SETTINGS, "Activity 生命周期入口安装失败", t); }
         try {
-            int count = XposedBridge.hookAllMethods(android.widget.TextView.class, "setText", new XC_MethodHook() {
+            int count = HookRuntime.hookAllMethods(android.widget.TextView.class, "setText", new ModernHookCallback() {
                 @Override protected void afterHookedMethod(MethodHookParam param) {
                     android.widget.TextView tv = (android.widget.TextView) param.thisObject;
                     CharSequence text = tv.getText();
@@ -44,8 +43,8 @@ public final class SettingsEntryHook {
             Log.i(TAG_SETTINGS, "TextView.setText 实际 Hook 数=" + count);
         } catch (Throwable t) { Log.e(TAG_SETTINGS, "设置文本绑定入口安装失败", t); }
         try {
-            Class<?> frag = XposedHelpers.findClassIfExists("com.chaoxing.study.mine.MineFragment2", loader);
-            int count = frag == null ? 0 : XposedBridge.hookAllMethods(frag, "onViewCreated", new XC_MethodHook() {
+            Class<?> frag = HookRuntime.findClassIfExists("com.chaoxing.study.mine.MineFragment2", loader);
+            int count = frag == null ? 0 : HookRuntime.hookAllMethods(frag, "onViewCreated", new ModernHookCallback() {
                 @Override protected void afterHookedMethod(MethodHookParam param) {
                     if (param.args.length > 0 && param.args[0] instanceof android.view.View) {
                         watchSettingsEntry((android.view.View) param.args[0], "MineFragment2.onViewCreated");
@@ -57,7 +56,7 @@ public final class SettingsEntryHook {
                     + "（0 表示类或声明方法未匹配，使用其他入口）");
         } catch (Throwable t) { Log.e(TAG_SETTINGS, "我的页面精准入口安装失败", t); }
         if (installed == 0) throw new IllegalStateException("未安装任何设置入口 Hook");
-        android.app.Application current = AndroidAppHelper.currentApplication();
+        android.content.Context current = HostContext.getContext();
         // 已有前台页会由文本绑定/后续 onResume 覆盖，此处不使用 Application Context 打开窗口。
         Log.i(TAG_SETTINGS, "设置入口观察已安装，总 Hook 数=" + installed
                 + "，等待实际控件匹配；Application=" + (current != null));

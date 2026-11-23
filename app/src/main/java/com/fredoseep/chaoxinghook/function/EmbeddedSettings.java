@@ -229,7 +229,7 @@ public final class EmbeddedSettings {
                 try {
                     Method method = current.getDeclaredMethod("onActivityResult", int.class, int.class, Intent.class);
                     if (!HOOKED.contains(method)) {
-                        de.robv.android.xposed.XposedBridge.hookMethod(method, new de.robv.android.xposed.XC_MethodHook() {
+                        com.fredoseep.chaoxinghook.xposed.HookRuntime.hookMethod(method, new com.fredoseep.chaoxinghook.xposed.ModernHookCallback() {
                             @Override protected void beforeHookedMethod(MethodHookParam param) {
                                 if (EmbeddedSettings.onActivityResult((Activity) param.thisObject,
                                     (Integer) param.args[0], (Integer) param.args[1], (Intent) param.args[2])) param.setResult(null);

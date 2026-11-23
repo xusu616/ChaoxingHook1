@@ -7,13 +7,13 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedHelpers;
+import com.fredoseep.chaoxinghook.xposed.ModernHookCallback;
+import com.fredoseep.chaoxinghook.xposed.HookRuntime;
 
 /** 视频课程响应中的快进、倍速和切屏播放参数处理。 */
 final class VideoUnlockHook {
     private static final String TAG_VIDEO = "CX.Video";
-    static boolean intercept(String url, Object requestObj, XC_MethodHook.MethodHookParam innerParam, ClassLoader loader) throws Throwable {
+    static boolean intercept(String url, Object requestObj, ModernHookCallback.MethodHookParam innerParam, ClassLoader loader) throws Throwable {
         if (url.contains("knowledge/cards") || url.contains("richvideo/initdatawithviewer") || url.contains("studentstudy")) {
             try {
                 URL targetUrl = new URL(url);
@@ -21,9 +21,9 @@ final class VideoUnlockHook {
 
                 // 复制原请求的方法与 Header
                 if (requestObj != null) {
-                    conn.setRequestMethod((String) XposedHelpers.callMethod(requestObj, "getMethod"));
+                    conn.setRequestMethod((String) HookRuntime.callMethod(requestObj, "getMethod"));
                     @SuppressWarnings("unchecked")
-                    Map<String, String> headers = (Map<String, String>) XposedHelpers.callMethod(requestObj, "getRequestHeaders");
+                    Map<String, String> headers = (Map<String, String>) HookRuntime.callMethod(requestObj, "getRequestHeaders");
                     if (headers != null) {
                         for (Map.Entry<String, String> entry : headers.entrySet()) {
                             if (!entry.getKey().equalsIgnoreCase("Accept-Encoding")) {
@@ -84,7 +84,7 @@ final class VideoUnlockHook {
                 }
 
                 // ================= 重新打包返回 =================
-                Class<?> responseClass = XposedHelpers.findClassIfExists("android.webkit.WebResourceResponse", loader);
+                Class<?> responseClass = HookRuntime.findClassIfExists("android.webkit.WebResourceResponse", loader);
                 if (responseClass != null) {
                     String contentType = conn.getContentType();
                     String mimeType = "text/html";
@@ -96,7 +96,7 @@ final class VideoUnlockHook {
                             charset = parts[1].split("=")[1].trim();
                         }
                     }
-                    innerParam.setResult(XposedHelpers.newInstance(
+                    innerParam.setResult(HookRuntime.newInstance(
                             responseClass,
                             mimeType,
                             charset,

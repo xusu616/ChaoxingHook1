@@ -4,9 +4,8 @@ import android.util.Log;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.XposedHelpers;
+import com.fredoseep.chaoxinghook.xposed.ModernHookCallback;
+import com.fredoseep.chaoxinghook.xposed.HookRuntime;
 import org.luckypray.dexkit.DexKitBridge;
 import org.luckypray.dexkit.query.FindClass;
 import org.luckypray.dexkit.query.matchers.ClassMatcher;
@@ -65,7 +64,7 @@ final class HookReflection {
         }
         if (className != null) {
             try {
-                Class<?> clazz = XposedHelpers.findClassIfExists(className, loader);
+                Class<?> clazz = HookRuntime.findClassIfExists(className, loader);
                 if (clazz != null) {
                     Log.i(featureLogTag(tag), "Chaoxing DexKit[" + tag + "]: fallback class " + clazz.getName());
                     return clazz;
@@ -101,13 +100,13 @@ final class HookReflection {
         return result;
     }
 
-    static void hookMethodSafe(Method method, XC_MethodHook callback, String tag) {
+    static void hookMethodSafe(Method method, ModernHookCallback callback, String tag) {
         if (method == null) {
             Log.e(featureLogTag(tag), "Hook[" + tag + "]: 方法未找到（类名或签名已变化）");
             return;
         }
         try {
-            XposedBridge.hookMethod(method, callback);
+            HookRuntime.hookMethod(method, callback);
             Log.i(featureLogTag(tag), "Chaoxing DexKit[" + tag + "]: hooked " + method.toGenericString());
         } catch (Throwable t) {
             Log.e(featureLogTag(tag), "Chaoxing DexKit[" + tag + "]: hook failed " + t);
@@ -115,7 +114,7 @@ final class HookReflection {
     }
 
     static android.widget.TextView findTextViewField(Object obj, String preferredName) {
-        try { return (android.widget.TextView) XposedHelpers.getObjectField(obj, preferredName); }
+        try { return (android.widget.TextView) HookRuntime.getObjectField(obj, preferredName); }
         catch (Throwable t) {
             try {
                 for (java.lang.reflect.Field f : obj.getClass().getDeclaredFields()) {
@@ -132,7 +131,7 @@ final class HookReflection {
     static java.util.List<?> findListField(Object obj, String[] preferredNames) {
         for (String name : preferredNames) {
             try {
-                Object v = XposedHelpers.getObjectField(obj, name);
+                Object v = HookRuntime.getObjectField(obj, name);
                 if (v instanceof java.util.List) return (java.util.List<?>) v;
             } catch (Throwable ignored) {}
         }

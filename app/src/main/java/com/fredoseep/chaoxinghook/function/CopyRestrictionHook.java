@@ -2,20 +2,20 @@ package com.fredoseep.chaoxinghook.function;
 
 import android.util.Log;
 
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedHelpers;
+import com.fredoseep.chaoxinghook.xposed.ModernHookCallback;
+import com.fredoseep.chaoxinghook.xposed.HookRuntime;
 import static com.fredoseep.chaoxinghook.function.HookConfigRepository.getSignConfig;
 
 /** 复制限制 CSS 拦截及页面可选择、可复制脚本。 */
 final class CopyRestrictionHook {
     private static final String TAG_COPY = "CX.Copy";
-    static boolean intercept(String url, Object requestObj, XC_MethodHook.MethodHookParam innerParam, ClassLoader loader) throws Throwable {
+    static boolean intercept(String url, Object requestObj, ModernHookCallback.MethodHookParam innerParam, ClassLoader loader) throws Throwable {
         if (getSignConfig().enableCopyRestriction && url.contains("notAllowCopy.css")) {
             try {
-                Class<?> responseClass = XposedHelpers.findClassIfExists("android.webkit.WebResourceResponse", loader);
+                Class<?> responseClass = HookRuntime.findClassIfExists("android.webkit.WebResourceResponse", loader);
                 if (responseClass != null) {
                     String emptyCss = "";
-                    innerParam.setResult(XposedHelpers.newInstance(
+                    innerParam.setResult(HookRuntime.newInstance(
                             responseClass,
                             "text/css",
                             "utf-8",

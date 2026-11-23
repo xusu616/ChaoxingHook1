@@ -2,15 +2,15 @@ package com.fredoseep.chaoxinghook.function;
 
 import android.util.Log;
 import java.io.ByteArrayInputStream;
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedHelpers;
+import com.fredoseep.chaoxinghook.xposed.ModernHookCallback;
+import com.fredoseep.chaoxinghook.xposed.HookRuntime;
 import static com.fredoseep.chaoxinghook.function.HookConfigRepository.getSignConfig;
 
 /** 进程退出、考试上报请求及 H5 生命周期处理。 */
 public final class ExamRiskHook {
     private static final String TAG_EXAM_RISK = "CX.ExamRisk";
     public static void installProcessExitHook() {
-        XC_MethodHook exitHook = new XC_MethodHook() {
+        ModernHookCallback exitHook = new ModernHookCallback() {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) {
                 if (!getSignConfig().bypassExamCheat) return;
@@ -25,17 +25,17 @@ public final class ExamRiskHook {
             }
         };
 
-        XposedHelpers.findAndHookMethod(System.class, "exit", int.class, exitHook);
-        XposedHelpers.findAndHookMethod(Runtime.class, "exit", int.class, exitHook);
+        HookRuntime.findAndHookMethod(System.class, "exit", int.class, exitHook);
+        HookRuntime.findAndHookMethod(Runtime.class, "exit", int.class, exitHook);
     }
 
-    static boolean intercept(String url, Object requestObj, XC_MethodHook.MethodHookParam innerParam, ClassLoader loader) throws Throwable {
+    static boolean intercept(String url, Object requestObj, ModernHookCallback.MethodHookParam innerParam, ClassLoader loader) throws Throwable {
         if (getSignConfig().bypassExamCheat && (url.startsWith("https://mooc1-api.chaoxing.com/keeper/api/receiveExamLogs") || url.contains("/exam-ans/exam/phone/exit-count")||url.contains("https://data-xxt.aichoxing.com/analysis/ac_event")||url.contains("pan-yz.chaoxing.com/upload"))) {
             try {
-                Class<?> responseClass = XposedHelpers.findClassIfExists("android.webkit.WebResourceResponse", loader);
+                Class<?> responseClass = HookRuntime.findClassIfExists("android.webkit.WebResourceResponse", loader);
                 if (responseClass != null) {
                     String fakeResponse = "{\"status\":1,\"result\":true,\"msg\":\"success\",\"data\":null}";
-                    innerParam.setResult(XposedHelpers.newInstance(
+                    innerParam.setResult(HookRuntime.newInstance(
                             responseClass,
                             "application/json",
                             "utf-8",

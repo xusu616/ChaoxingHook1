@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedHelpers;
+import com.fredoseep.chaoxinghook.xposed.ModernHookCallback;
+import com.fredoseep.chaoxinghook.xposed.HookRuntime;
 import static com.fredoseep.chaoxinghook.function.HookConfigRepository.getSignConfig;
 import static com.fredoseep.chaoxinghook.function.SignLocationMath.*;
 
@@ -24,7 +24,7 @@ final class LocationSignHook {
     private static final List<LocationPoint> historyPoints = new ArrayList<>();
     private static double[] calculatedTarget;
 
-    static boolean intercept(String url, Object requestObj, XC_MethodHook.MethodHookParam innerParam, ClassLoader loader) throws Throwable {
+    static boolean intercept(String url, Object requestObj, ModernHookCallback.MethodHookParam innerParam, ClassLoader loader) throws Throwable {
         if (url.contains("stuSignajax") &&
                 ((requestObj instanceof android.webkit.WebResourceRequest &&
                         "POST".equalsIgnoreCase(((android.webkit.WebResourceRequest) requestObj).getMethod())) ||
@@ -100,9 +100,9 @@ final class LocationSignHook {
                 URL newUrl = new URL(newUrlString);
                 HttpURLConnection conn = (HttpURLConnection) newUrl.openConnection();
                 if (requestObj != null) {
-                    conn.setRequestMethod((String) XposedHelpers.callMethod(requestObj, "getMethod"));
+                    conn.setRequestMethod((String) HookRuntime.callMethod(requestObj, "getMethod"));
                     @SuppressWarnings("unchecked")
-                    Map<String, String> headers = (Map<String, String>) XposedHelpers.callMethod(requestObj, "getRequestHeaders");
+                    Map<String, String> headers = (Map<String, String>) HookRuntime.callMethod(requestObj, "getRequestHeaders");
                     if (headers != null) {
                         for (Map.Entry<String, String> entry : headers.entrySet()) {
                             conn.setRequestProperty(entry.getKey(), entry.getValue());
@@ -161,9 +161,9 @@ final class LocationSignHook {
                 }
 
                 String contentType = conn.getContentType();
-                Class<?> responseClass = XposedHelpers.findClassIfExists("android.webkit.WebResourceResponse", loader);
+                Class<?> responseClass = HookRuntime.findClassIfExists("android.webkit.WebResourceResponse", loader);
                 if (responseClass != null) {
-                    innerParam.setResult(XposedHelpers.newInstance(
+                    innerParam.setResult(HookRuntime.newInstance(
                             responseClass,
                             (contentType != null) ? contentType.split(";")[0].trim() : "application/json",
                             conn.getContentEncoding() != null ? conn.getContentEncoding() : "utf-8",

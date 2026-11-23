@@ -3,9 +3,8 @@ package com.fredoseep.chaoxinghook.function;
 import android.util.Log;
 import java.lang.reflect.Method;
 
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.XposedHelpers;
+import com.fredoseep.chaoxinghook.xposed.ModernHookCallback;
+import com.fredoseep.chaoxinghook.xposed.HookRuntime;
 import org.luckypray.dexkit.DexKitBridge;
 import static com.fredoseep.chaoxinghook.function.HookReflection.*;
 
@@ -21,10 +20,10 @@ public final class ChatHook {
             Class<?> clazz = findClassByMethods(bridge, loader, "chat-filter",
                     ObfuscationMap.CLASS_CHAT_MANAGER, "void", "java.util.List", "boolean");
             if (clazz == null) {
-                try { clazz = XposedHelpers.findClassIfExists(ObfuscationMap.CLASS_CHAT_MANAGER, loader); } catch (Throwable ignored) {}
+                try { clazz = HookRuntime.findClassIfExists(ObfuscationMap.CLASS_CHAT_MANAGER, loader); } catch (Throwable ignored) {}
             }
             if (clazz != null) {
-                XC_MethodHook filterHook = new XC_MethodHook() {
+                ModernHookCallback filterHook = new ModernHookCallback() {
                     @Override protected void beforeHookedMethod(MethodHookParam param) {
                         try {
                             if (param.args.length > 0 && (param.args[0] instanceof java.util.List)) {
@@ -34,7 +33,7 @@ public final class ChatHook {
                                     Object info = list.get(i);
                                     if (info != null
                                             && "com.chaoxing.mobile.chat.ConversationInfo".equals(info.getClass().getName())
-                                            && (Integer) XposedHelpers.callMethod(info, "getType") == 20) {
+                                            && (Integer) HookRuntime.callMethod(info, "getType") == 20) {
                                         list.remove(i);
                                         removed++;
                                     }
@@ -58,7 +57,7 @@ public final class ChatHook {
 
         // 7. EMCmdMessageBody.action()：环信 SDK 库类（第三方库不混淆，保持硬编码）
         try {
-            XposedBridge.hookAllMethods(XposedHelpers.findClass(ObfuscationMap.CLASS_EM_CMD_MESSAGE_BODY, loader), ObfuscationMap.METHOD_EM_CMD_ACTION, new XC_MethodHook() { @Override protected void afterHookedMethod(MethodHookParam param) { Object result = param.getResult(); if (result != null && "REVOKE_FLAG".equals(result.toString())) { param.setResult("BLOCK_REVOKE_FLAG"); } } });
+            HookRuntime.hookAllMethods(HookRuntime.findClass(ObfuscationMap.CLASS_EM_CMD_MESSAGE_BODY, loader), ObfuscationMap.METHOD_EM_CMD_ACTION, new ModernHookCallback() { @Override protected void afterHookedMethod(MethodHookParam param) { Object result = param.getResult(); if (result != null && "REVOKE_FLAG".equals(result.toString())) { param.setResult("BLOCK_REVOKE_FLAG"); } } });
         } catch (Throwable t) {}
     }
 }

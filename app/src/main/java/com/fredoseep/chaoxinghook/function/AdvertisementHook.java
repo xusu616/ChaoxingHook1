@@ -2,7 +2,7 @@ package com.fredoseep.chaoxinghook.function;
 
 import android.util.Log;
 import java.lang.reflect.Method;
-import de.robv.android.xposed.XC_MethodHook;
+import com.fredoseep.chaoxinghook.xposed.ModernHookCallback;
 import org.luckypray.dexkit.DexKitBridge;
 import static com.fredoseep.chaoxinghook.function.HookReflection.*;
 
@@ -17,7 +17,7 @@ public final class AdvertisementHook {
             Class<?> clazz = findClassByMethods(bridge, loader, "splash",
                     ObfuscationMap.CLASS_SPLASH_VIEW_MODEL, null, "android.app.Activity");
             Method m = findMethodBySignature(clazz, null, "android.app.Activity");
-            hookMethodSafe(m, new XC_MethodHook() {
+            hookMethodSafe(m, new ModernHookCallback() {
                 @Override protected void afterHookedMethod(MethodHookParam param) { param.setResult(null); }
             }, "splash.a");
         } catch (Throwable t) { Log.e(TAG_SPLASH, "core-group-1 FAILED: ", t); }
@@ -27,7 +27,7 @@ public final class AdvertisementHook {
             Class<?> clazz = findClassByMethods(bridge, loader, "home-header",
                     ObfuscationMap.CLASS_HOME_PAGE_HEADER, "void", "java.util.List");
             Method m = findMethodBySignature(clazz, "void", "java.util.List");
-            hookMethodSafe(m, new XC_MethodHook() {
+            hookMethodSafe(m, new ModernHookCallback() {
                 @Override protected void beforeHookedMethod(MethodHookParam param) {
                     if (param.args.length > 0) param.args[0] = null;
                 }
